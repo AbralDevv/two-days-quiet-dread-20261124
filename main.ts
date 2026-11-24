@@ -1,34 +1,22 @@
-// Two Days of Quiet Dread — make.fun entry program.
-// Writes one line (<=140 chars) to /output/entry.txt (or the dir given
-// by argv[2], $MAKEFUN_OUTPUT_DIR, falling back to ./output).
-// The line approves the pull request in a flat voice: the tests pass,
-// and the dread is the quiet acceptance that the file is now beyond
-// anyone's understanding — no exclamation, no cry for help.
-// Node stdlib only.
+// Two Days of Quiet Dread — one-liner entry (Neon FINAL line, Wave 3 revision).
+// Writes the line verbatim to entry.txt in the grader's output dir.
+// Output dir: $MAKEFUN_OUTPUT_DIR when the grader sets it, else /output, else ./output.
+// entry.txt holds exactly the line — no trailing newline, no extra text.
 import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const ENTRY =
-  "LGTM — it passes the tests, and I have quietly accepted that none of us will ever fully understand this file again.";
+const LINE = "Approved. Your 6-line PR deleted 400 lines I spent all Q3 writing and cut latency in half. Anyway, park rangers stop hiring at age 37.";
 
-function resolveOutputDir(): string {
-  const fromArgv = process.argv[2];
-  if (fromArgv) return fromArgv;
-  const fromEnv = process.env.MAKEFUN_OUTPUT_DIR;
-  if (fromEnv) return fromEnv;
-  return "/output";
-}
-
-function main(): void {
-  let outDir = resolveOutputDir();
+function resolveOutDir(): string {
+  if (process.env.MAKEFUN_OUTPUT_DIR) return process.env.MAKEFUN_OUTPUT_DIR;
   try {
-    mkdirSync(outDir, { recursive: true });
+    mkdirSync("/output", { recursive: true });
+    return "/output";
   } catch {
-    // /output may not be writable outside the harness; use ./output instead.
-    outDir = "./output";
-    mkdirSync(outDir, { recursive: true });
+    return "./output";
   }
-  // One line, no trailing explanation — the file holds exactly the entry.
-  writeFileSync(`${outDir}/entry.txt`, ENTRY + "\n", "utf-8");
 }
 
-main();
+const outDir = resolveOutDir();
+mkdirSync(outDir, { recursive: true });
+writeFileSync(join(outDir, "entry.txt"), LINE, "utf8");
